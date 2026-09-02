@@ -11,7 +11,7 @@
 
 backend:
   name: github
-  repo: YOUR-GITHUB-USERNAME/davistripholidays # ← CHANGE THIS
+  repo: davistripholidays/davistripholidays # ← CHANGE THIS
   branch: main
 
 site_url: https://davistripholidays.com
