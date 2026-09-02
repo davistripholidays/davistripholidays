@@ -1,0 +1,20 @@
+# Security + caching headers for Cloudflare Pages
+# Applied automatically to every deployment alongside the static export.
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+
+# HTML: always revalidate so content edits go live immediately
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Hashed static assets: cache forever
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  Cache-Control: public, max-age=2592000

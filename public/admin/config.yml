@@ -1,0 +1,169 @@
+# Sveltia CMS configuration — Davis Trip Holidays
+# Docs: https://github.com/sveltia/sveltia-cms
+#
+# SETUP (one-time, ~10 minutes — full walkthrough in SETUP-GUIDE.md):
+#   1. Push this project to a GitHub repository.
+#   2. Change `repo:` below to YOUR-GITHUB-USERNAME/davistripholidays.
+#   3. Connect the repo to Cloudflare Pages.
+#   4. Open https://davistripholidays.com/admin and sign in with GitHub.
+# Sveltia's free hosted GitHub authentication works out of the box — no
+# OAuth server of your own needed.
+
+backend:
+  name: github
+  repo: YOUR-GITHUB-USERNAME/davistripholidays # ← CHANGE THIS
+  branch: main
+
+site_url: https://davistripholidays.com
+logo_url: https://davistripholidays.com/icon.svg
+locale: en
+
+media_folder: public/images/cms
+public_folder: /images/cms
+
+collections:
+  # ── Packages ─────────────────────────────────────────────
+  - name: packages
+    label: Packages
+    label_singular: Package
+    folder: content/packages
+    create: true
+    slug: "{{fields.name}}-{{duration}}"
+    sortable_fields: [name, priceFrom, destination, featured]
+    summary: "{{name}} — {{duration}} · ₹{{priceFrom}}"
+    editor:
+      preview: true
+    fields:
+      - { label: "Package name", name: name, widget: string, hint: "e.g. Manali Family Holiday" }
+      - label: "Destination"
+        name: destination
+        widget: relation
+        collection: destinations
+        search_fields: [name]
+        value_field: "{{slug}}"
+        display_fields: [name]
+      - { label: "Duration (e.g. 4N / 5D)", name: duration, widget: string }
+      - { label: "Starting price (₹ per person)", name: priceFrom, widget: number, min: 0, hint: "Shown as 'Starting from'. Final quotes vary — that's normal." }
+      - { label: "Old price (₹, optional)", name: strikePrice, widget: number, required: false, min: 0, hint: "Leave empty if no strike-through price." }
+      - label: "Trip type"
+        name: category
+        widget: select
+        multiple: true
+        options: [family, honeymoon, group, pilgrimage]
+        hint: "Used for filtering and badges."
+      - { label: "Main photo", name: heroImage, widget: image, hint: "Landscape photo works best." }
+      - { label: "Photo description (for accessibility/SEO)", name: heroAlt, widget: string, required: false }
+      - label: "More photos"
+        name: gallery
+        widget: list
+        field: { label: Photo, name: "", widget: image }
+        required: false
+      - { label: "Hotels note", name: hotels, widget: string, hint: "e.g. Handpicked 3-star hotels with heating" }
+      - { label: "Seasonal note (optional)", name: seasonal, widget: string, required: false, hint: "e.g. Snow-season dates sell out early" }
+      - { label: "Show on homepage", name: featured, widget: boolean, default: false, hint: "Featured packages appear on the homepage and top of /packages." }
+      - label: "Day-by-day itinerary"
+        name: itinerary
+        widget: list
+        fields:
+          - { label: "Day number", name: day, widget: number }
+          - { label: "Day title", name: title, widget: string }
+          - { label: "What happens", name: description, widget: text }
+      - label: "What's included"
+        name: inclusions
+        widget: list
+        field: { label: Item, name: "", widget: string }
+      - label: "Not included"
+        name: exclusions
+        widget: list
+        field: { label: Item, name: "", widget: string }
+      - { label: "Trip overview (shown under the title)", name: body, widget: markdown, hint: "2–3 short paragraphs. Leave a blank line between paragraphs." }
+      - { label: "SEO title (optional)", name: seoTitle, widget: string, required: false, hint: "Shown in Google results. ~60 characters." }
+      - { label: "SEO description (optional)", name: seoDescription, widget: text, required: false, hint: "~155 characters." }
+
+  # ── Destinations ─────────────────────────────────────────
+  - name: destinations
+    label: Destinations
+    label_singular: Destination
+    folder: content/destinations
+    create: true
+    slug: "{{name}}"
+    summary: "{{name}} ({{region}})"
+    fields:
+      - { label: "Name", name: name, widget: string }
+      - { label: "Region/state", name: region, widget: string, hint: "e.g. Himachal Pradesh" }
+      - { label: "Tagline", name: tagline, widget: string, hint: "One line, e.g. The heart of every Himalayan holiday" }
+      - { label: "Main photo", name: heroImage, widget: image }
+      - { label: "Photo description", name: heroAlt, widget: string, required: false }
+      - label: "More photos"
+        name: gallery
+        widget: list
+        field: { label: Photo, name: "", widget: image }
+        required: false
+      - { label: "Best season", name: bestSeason, widget: string }
+      - { label: "Ideal duration", name: idealDuration, widget: string, hint: "e.g. 4 – 6 days" }
+      - { label: "Show on homepage grid", name: featured, widget: boolean, default: false }
+      - { label: "About this destination", name: body, widget: markdown }
+      - { label: "SEO title (optional)", name: seoTitle, widget: string, required: false }
+      - { label: "SEO description (optional)", name: seoDescription, widget: text, required: false }
+
+  # ── Testimonials ─────────────────────────────────────────
+  - name: testimonials
+    label: Reviews
+    label_singular: Review
+    folder: content/testimonials
+    create: true
+    slug: "{{name}}"
+    summary: "{{name}} · {{trip}}"
+    fields:
+      - { label: "Customer name", name: name, widget: string, hint: "Only publish reviews you have permission to show." }
+      - { label: "Where they're from", name: origin, widget: string, required: false }
+      - { label: "Which trip", name: trip, widget: string }
+      - { label: "Stars", name: rating, widget: number, default: 5, min: 1, max: 5 }
+      - { label: "Platform", name: platform, widget: select, options: [Google, JustDial, Facebook, Instagram, Other], default: Google }
+      - { label: "Year", name: date, widget: string, required: false, hint: "e.g. 2026" }
+      - { label: "Show on homepage", name: featured, widget: boolean, default: true }
+      - { label: "Review text", name: body, widget: text }
+
+  # ── FAQs ─────────────────────────────────────────────────
+  - name: faqs
+    label: FAQs
+    label_singular: FAQ
+    folder: content/faqs
+    create: true
+    slug: "{{question}}"
+    summary: "{{question}}"
+    fields:
+      - { label: "Question", name: question, widget: string }
+      - { label: "Order on page", name: order, widget: number, default: 99, hint: "Lower numbers appear first." }
+      - { label: "Answer", name: body, widget: text }
+
+  # ── Blog ─────────────────────────────────────────────────
+  - name: blog
+    label: Blog
+    label_singular: Blog post
+    folder: content/blog
+    create: true
+    slug: "{{title}}"
+    summary: "{{title}} ({{date}})"
+    fields:
+      - { label: "Title", name: title, widget: string }
+      - { label: "Publish date", name: date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { label: "Short summary (listing + SEO)", name: excerpt, widget: text }
+      - { label: "Cover photo", name: heroImage, widget: image }
+      - { label: "Cover photo description", name: heroAlt, widget: string, required: false }
+      - { label: "Article", name: body, widget: markdown }
+
+  # ── Site settings ────────────────────────────────────────
+  - name: settings
+    label: Site settings
+    files:
+      - name: site
+        label: General settings
+        file: content/settings/site.md
+        fields:
+          - { label: "Office hours", name: officeHours, widget: string }
+          - { label: "Response promise", name: responseSla, widget: string, hint: "Shown near forms, e.g. 'Replies from a travel expert within 2 working hours'" }
+          - { label: "Contact email", name: email, widget: string }
+          - { label: "Instagram URL", name: instagram, widget: string, required: false }
+          - { label: "Facebook URL", name: facebook, widget: string, required: false }
+          - { label: "YouTube URL", name: youtube, widget: string, required: false }
